@@ -19,7 +19,7 @@ html#hELLO(
     link(rel='stylesheet' :href='"//fonts.googleapis.com/css2?family=Source+Code+Pro:ital@0;1&display=swap"')
     link(rel='stylesheet' :href='"//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"')
     link(rel='stylesheet' :href='`//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/${dark ? skinOptions.hljsDark : skinOptions.hljs}.min.css`')
-    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css' integrity='sha384-n8MV3yE9puX0nwms4wu3mrN+noQhSKULpmzQ0zX7hpt8DZzB1G8N/RC/aYIKU' crossorigin='anonymous')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css' integrity='sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV' crossorigin='anonymous')
 
     script(src='./images/bootstrap.js')
 
@@ -86,21 +86,48 @@ html#hELLO(
         }
       })))
 
-    script(defer src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js' integrity='sha384-zz7BPX/OzqT0FrxipxYwYmKzzXwEFtPG+ekQLh35qQJ/bYg/Y6/jKz/aYIKU' crossorigin='anonymous')
-    script(defer src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js' integrity='sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05' crossorigin='anonymous' onload='renderMathInElement(document.body);')
-
-    script(defer src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js' integrity='sha384-zz7BPX/OzqT0FrxipxYwYmKzzXwEFtPG+ekQLh35qQJ/bYg/Y6/jKz/aYIKU' crossorigin='anonymous')
+    script(defer src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js' integrity='sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8' crossorigin='anonymous')
     script(defer src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js' integrity='sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05' crossorigin='anonymous')
     script.
       document.addEventListener('DOMContentLoaded', () => {
+        const articleBody = document.querySelector('.contents_style');
+        if (articleBody) {
+          let bodyHTML = articleBody.innerHTML;
+          const displayMathRegex = /\$\$([\s\S]*?)\$\$/g;
+
+          bodyHTML = bodyHTML.replace(displayMathRegex, (match, latexSource) => {
+            // 1. Decode HTML entities first (e.g., &lt;br&gt; -> <br>)
+            const decoder = document.createElement('textarea');
+            decoder.innerHTML = latexSource;
+            let cleanedLatex = decoder.value;
+
+            // 2. Replace <br> tags with the LaTeX newline command
+            cleanedLatex = cleanedLatex.replace(/<br\s*\/?>/gi, ' \\ ');
+
+            try {
+              return katex.renderToString(cleanedLatex, {
+                displayMode: true,
+                throwOnError: false
+              });
+            } catch (e) {
+              console.error('KaTeX rendering failed for block:', cleanedLatex, e);
+              return match;
+            }
+          });
+
+          articleBody.innerHTML = bodyHTML;
+        }
+
+        // Render all math, including inline math, for the whole document.
         renderMathInElement(document.body, {
           delimiters: [
             {left: '$$', right: '$$', display: true},
             {left: '$', right: '$', display: false},
-            {left: '\\(', right: '\\)', display: false},
-            {left: '\\\\[', right: '\\\\]', display: true}
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false}
           ],
-          throwOnError : false
+          throwOnError: false
         });
-        Alpine.start()
-      })
+
+        Alpine.start();
+      });

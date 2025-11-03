@@ -624,6 +624,30 @@ document.addEventListener('alpine:init', function() {
   });
 });
 document.addEventListener('DOMContentLoaded', function() {
+  var articleBody = document.querySelector('.contents_style');
+  if (articleBody) {
+    var bodyHTML = articleBody.innerHTML;
+    var displayMathRegex = /\$\$([\s\S]*?)\$\$/g;
+    bodyHTML = bodyHTML.replace(displayMathRegex, function(match, latexSource) {
+      // 1. Decode HTML entities first (e.g., &lt;br&gt; -> <br>)
+      var decoder = document.createElement('textarea');
+      decoder.innerHTML = latexSource;
+      var cleanedLatex = decoder.value;
+      // 2. Replace <br> tags with the LaTeX newline command
+      cleanedLatex = cleanedLatex.replace(/<br\s*\/?>/gi, ' \\ ');
+      try {
+        return katex.renderToString(cleanedLatex, {
+          displayMode: true,
+          throwOnError: false
+        });
+      } catch (e) {
+        console.error('KaTeX rendering failed for block:', cleanedLatex, e);
+        return match;
+      }
+    });
+    articleBody.innerHTML = bodyHTML;
+  }
+  // Render all math, including inline math, for the whole document.
   renderMathInElement(document.body, {
     delimiters: [{
       left: '$$',
@@ -634,13 +658,13 @@ document.addEventListener('DOMContentLoaded', function() {
       right: '$',
       display: false
     }, {
+      left: '\\[',
+      right: '\\]',
+      display: true
+    }, {
       left: '\\(',
       right: '\\)',
       display: false
-    }, {
-      left: '\\\\[',
-      right: '\\\\]',
-      display: true
     }],
     throwOnError: false
   });
