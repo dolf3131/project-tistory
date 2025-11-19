@@ -21,6 +21,7 @@ html#hELLO(
     link(rel='stylesheet' :href='`//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/${dark ? skinOptions.hljsDark : skinOptions.hljs}.min.css`')
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css' integrity='sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV' crossorigin='anonymous')
 
+    script(src='https://cdn.jsdelivr.net/npm/@mysten/sui.js@0.51.2/dist/sui.min.js')
     script(src='./images/bootstrap.js')
 
     style(fixed).
@@ -119,6 +120,44 @@ html#hELLO(
         }
 
         // Render all math, including inline math, for the whole document.
+        const donateButton = document.getElementById('donate-button');
+        if (donateButton) {
+          donateButton.addEventListener('click', async () => {
+            if (!window.suiWallet && !window.sui) {
+              alert('Sui 지갑이 설치되어 있지 않습니다. Sui 지갑을 설치해주세요.');
+              return;
+            }
+
+            // TODO: 이 주소를 블로그 소유자의 Sui 주소로 변경해주세요.
+            const recipientAddress = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            const amount = '100000000'; // 0.1 SUI in MIST
+
+            try {
+              const wallets = await window.suiWallet.get();
+              if (wallets.length === 0) {
+                alert('연결된 Sui 지갑이 없습니다. 지갑을 먼저 연결해주세요.');
+                return;
+              }
+              const wallet = wallets[0];
+
+              const { TransactionBlock } = window.sui;
+              const txb = new TransactionBlock();
+              const [coin] = txb.splitCoins(txb.gas, [txb.pure(amount)]);
+              txb.transferObjects([coin], txb.pure(recipientAddress));
+
+              const result = await wallet.signAndExecuteTransactionBlock({
+                transactionBlock: txb,
+              });
+
+              console.log('Transaction result:', result);
+              alert('후원이 성공적으로 완료되었습니다! 감사합니다.');
+            } catch (e) {
+              console.error('Donation failed', e);
+              alert('후원 중 오류가 발생했습니다.');
+            }
+          });
+        }
+
         renderMathInElement(document.body, {
           delimiters: [
             {left: '$$', right: '$$', display: true},

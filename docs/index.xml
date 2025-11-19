@@ -370,6 +370,22 @@
         <default>vs2015</default>
       </variable>
     </variablegroup>
+    <variablegroup name="후원">
+      <variable>
+        <name>sui-address</name>
+        <label>Sui 후원 주소</label>
+        <description><![CDATA[ ZK Login으로 생성된 Sui 주소를 입력하세요. ]]></description>
+        <type>STRING</type>
+        <default></default>
+      </variable>
+      <variable>
+        <name>google-client-id</name>
+        <label>Google Client ID</label>
+        <description><![CDATA[ ZK Login을 위한 Google OAuth 2.0 Client ID를 입력하세요. ]]></description>
+        <type>STRING</type>
+        <default></default>
+      </variable>
+    </variablegroup>
   </variables>
   <default>
     <liststyle>list</liststyle>

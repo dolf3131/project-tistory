@@ -1,0 +1,53 @@
+div(x-data='{ open: false }')
+  button#donate-button.btn_menu_toolbar(type='button', @click='open = true')
+    em 후원하기
+
+  template(x-teleport='body')
+    .fixed.inset-0.z-[100].flex.items-center.justify-center.bg-black.bg-opacity-50(
+      x-show='open',
+      x-transition:enter='transition ease-out duration-300',
+      x-transition:enter-start='opacity-0',
+      x-transition:enter-end='opacity-100',
+      x-transition:leave='transition ease-in duration-200',
+      x-transition:leave-start='opacity-100',
+      x-transition:leave-end='opacity-0'
+    )
+      .bg-white.dark:bg-gray-800.rounded-lg.shadow-lg.p-6.w-full.max-w-sm(
+        @click.outside='open = false',
+        x-show='open',
+        x-transition:enter='transition ease-out duration-300',
+        x-transition:enter-start='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95',
+        x-transition:enter-end='opacity-100 translate-y-0 sm:scale-100',
+        x-transition:leave='transition ease-in duration-200',
+        x-transition:leave-start='opacity-100 translate-y-0 sm:scale-100',
+        x-transition:leave-end='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+      )
+        // Popup Header
+        .flex.justify-between.items-center.border-b.pb-3
+          h3.text-lg.font-semibold 후원하기
+          button.text-gray-500.hover:text-gray-800.dark:hover:text-gray-300(@click='open = false')
+            i.fa-solid.fa-xmark
+
+        // Popup Body
+        .py-4#donation-popup-body
+          p.text-center 후원 지갑 주소가 설정되지 않았습니다.
+
+        // Popup Footer
+        .flex.justify-end.pt-3.border-t.gap-x-2
+          s_ad_div
+            button#donation-settings-btn.btn.btn-primary(type='button') 설정
+          button.btn(@click='open = false') 닫기
+
+style(once='content-donation-button')
+  :postcss
+    #article {
+      .container_postbtn {
+        #donate-button {
+          @apply before:fa-sack-dollar before:font-bold before:text-sm;
+
+          em {
+            @apply text-hidden;
+          }
+        }
+      }
+    }
